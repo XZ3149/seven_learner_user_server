@@ -25,7 +25,7 @@ def get_status():
     return result
 
 
-@app.route("/user/<AccountID>", methods=["GET", 'PUT', 'DELETE'])
+@app.route("/users/<AccountID>", methods=["GET", 'PUT', 'DELETE'])
 def get_user_by_account_id(AccountID):
 
     if request.method == 'GET':
@@ -62,7 +62,7 @@ def get_user_by_account_id(AccountID):
 
 
 
-@app.route("/user/<AccountID>/UserOrders", methods=["GET", "POST", 'DELETE'])
+@app.route("/users/<AccountID>/UserOrders", methods=["GET", "POST", 'DELETE'])
 def get_user_order_by_accountID(AccountID):
     # check whether user exist before checking all other things
     head_infor = UserResource.get_by_AccountID(AccountID)
@@ -122,7 +122,7 @@ def get_user_order_by_accountID(AccountID):
         return rsp
 
 
-@app.route("/user/<AccountID>/FavoriteRestaurants", methods=["GET", "POST", "DELETE"])
+@app.route("/users/<AccountID>/FavoriteRestaurants", methods=["GET", "POST", "DELETE"])
 def get_user_restaurants(AccountID):
     head_infor = UserResource.get_by_AccountID(AccountID)
     if not head_infor:
@@ -182,14 +182,7 @@ def get_user_restaurants(AccountID):
 
 
 
-
-
-
-
-
-
-
-@app.route("/user", methods=["GET",'POST'])
+@app.route("/users", methods=["GET",'POST'])
 def get_user_infor():
     if request.method == 'GET':
         FirstName = request.args.get('FirstName', default = None)
@@ -224,7 +217,7 @@ def get_user_infor():
         if not FirstName or not LastName or not Password or not Email:
             rsp = Response("Please Enter Correct Information", status=400, content_type="text/plain")
 
-        elif not UserResource.check_avalibility(Email):
+        elif not UserResource.check_email_avalibility(Email):
             rsp = Response("Email have been used", status=400, content_type="text/plain")
         else:
 

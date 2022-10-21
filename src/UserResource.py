@@ -62,7 +62,7 @@ class UserResource:
         result = cur.fetchall()
         return result
 
-    def check_avalibility(Email):
+    def check_email_avalibility(Email):
         sql = f'SELECT count(*) FROM Userinfor.user where Email="{Email}"';
         conn = UserResource._get_connection()
         cur = conn.cursor()
