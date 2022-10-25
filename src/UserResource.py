@@ -27,7 +27,7 @@ class UserResource:
     @staticmethod
     def get_by_AccountID(key):
 
-        sql = "SELECT AccountID, FirstName, LastName, Email FROM Userinfor.user where AccountID=%s";
+        sql = "SELECT AccountID, FirstName,MiddleName, LastName, Email FROM Userinfor.user where AccountID=%s";
         conn = UserResource._get_connection()
         cur = conn.cursor()
         res = cur.execute(sql, args=key)
@@ -114,12 +114,10 @@ class UserResource:
             sql += f'Password = %s, '
 
         sql = sql[:-2] + f' where AccountID = {AccountID}'
-        print(sql)
         values = []
         for i in [FirstName,LastName,MiddleName,Password]:
             if i:
                 values += [[i]]
-        print(values)
         conn = UserResource._get_connection()
         cur = conn.cursor()
         res = cur.execute(sql, values)

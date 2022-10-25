@@ -46,7 +46,7 @@ def get_user_by_account_id(AccountID):
             rsp = Response("You need to update something", status=400, content_type="text/plain")
         else:
             UserResource.update_user_infor(AccountID,FirstName,LastName,MiddleName, Password)
-            rsp = redirect(url_for('get_user_by_account_id', AccountID=AccountID))
+            rsp = redirect(url_for('get_user_by_account_id', AccountID=AccountID, _method='GET'), code = 303)
 
         return rsp
 
@@ -80,13 +80,15 @@ def get_user_order_by_accountID(AccountID):
         result = UserResource.get_order_by_userID(AccountID, per_page,offset)
 
         if result:
-            result.insert(0, head_infor)
-            result[0]['page'] = page
-            result[0]['numberPages'] = number_pages
-            rsp = Response(json.dumps(result), status=200, content_type="application.json")
+            head_infor['page'] = page
+            head_infor['numberPages'] = number_pages
+            head_infor['Orders'] = result
+
+            rsp = Response(json.dumps(head_infor), status=200, content_type="application.json")
         else:
             rsp = Response("NOT FOUND", status=404, content_type="text/plain")
         return rsp
+
 
     if request.method == "POST":
         OrderID = request.form.get('OrderID', default = None, type = int)
@@ -99,7 +101,7 @@ def get_user_order_by_accountID(AccountID):
         else:
             res = UserResource.add_user_order(AccountID,OrderID)
             if res:
-                rsp = redirect(url_for('get_user_order_by_accountID', AccountID=AccountID))
+                rsp = redirect(url_for('get_user_order_by_accountID', AccountID=AccountID, _method='GET'), code = 303)
             else:
                 rsp = Response("Update fail", status=400, content_type="text/plain")
         return rsp
@@ -115,7 +117,7 @@ def get_user_order_by_accountID(AccountID):
         else:
             res = UserResource.delete_user_order(OrderID)
             if res:
-                rsp = rsp = redirect(url_for('get_user_order_by_accountID', AccountID=AccountID))
+                rsp = rsp = redirect(url_for('get_user_order_by_accountID', AccountID=AccountID, _method='GET'), code = 303)
             else:
                 rsp = Response("delete fail", status=400, content_type="text/plain")
 
@@ -139,10 +141,11 @@ def get_user_restaurants(AccountID):
         result = UserResource.get_restaurants_by_userID(AccountID, per_page,offset)
 
         if result:
-            result.insert(0, head_infor)
-            result[0]['page'] = page
-            result[0]['numberPages'] = number_pages
-            rsp = Response(json.dumps(result), status=200, content_type="application.json")
+
+            head_infor['page'] = page
+            head_infor['numberPages'] = number_pages
+            head_infor['Restaurants'] = result
+            rsp = Response(json.dumps(head_infor), status=200, content_type="application.json")
         else:
             rsp = Response("NOT FOUND", status=404, content_type="text/plain")
         return rsp
@@ -160,7 +163,7 @@ def get_user_restaurants(AccountID):
         else:
             res = UserResource.add_user_restaurant(AccountID,RestaurantID,RestaurantName)
             if res:
-                rsp = redirect(url_for('get_user_restaurants', AccountID=AccountID))
+                rsp = redirect(url_for('get_user_restaurants', AccountID=AccountID, _method='GET'), code = 303)
             else:
                 rsp = Response("Update fail", status=400, content_type="text/plain")
         return rsp
@@ -174,7 +177,7 @@ def get_user_restaurants(AccountID):
         else:
             res = UserResource.delete_user_restaurant(RestaurantID)
             if res:
-                rsp = rsp = redirect(url_for('get_user_restaurants', AccountID=AccountID))
+                rsp = rsp = redirect(url_for('get_user_restaurants', AccountID=AccountID, _method='GET'), code = 303)
             else:
                 rsp = Response("delete fail", status=400, content_type="text/plain")
         return rsp
@@ -201,8 +204,9 @@ def get_user_infor():
             result = UserResource.get_users(per_page, offset)
         if result:
             number_pages = (count // per_page) + 1
-            result.insert(0, {'page': page, 'numberPages': number_pages})
-            rsp = Response(json.dumps(result), status=200, content_type="application.json")
+            rsp = {'page': page, 'numberPages': number_pages}
+            rsp['Users'] = result
+            rsp = Response(json.dumps(rsp), status=200, content_type="application.json")
         else:
             rsp = Response("NOT FOUND", status=404, content_type="text/plain")
         return rsp
@@ -224,7 +228,7 @@ def get_user_infor():
             result = UserResource.create_accountID(FirstName, LastName, MiddleName, Email, Password)
             # if insertion happen, server will return accountID, else return 0
             if result:
-                rsp = redirect(url_for('get_user_by_account_id', AccountID= result))
+                rsp = redirect(url_for('get_user_by_account_id', AccountID= result,_method='GET'), code = 303)
             else:
                 rsp = Response("Fail to create Account", status=400, content_type="text/plain")
         return rsp
