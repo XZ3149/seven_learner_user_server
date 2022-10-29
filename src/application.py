@@ -37,10 +37,18 @@ def get_user_by_account_id(AccountID):
         return rsp
 
     if request.method == "PUT":
-        FirstName = request.form.get('FirstName', default = None)
-        LastName = request.form.get('LastName', default = None)
-        Password = request.form.get('Password', default = None)
-        MiddleName = request.form.get('MiddleName', default = None)
+        if request.json:
+            value = request.get_json()
+            FirstName = value.get('FirstName')
+            LastName = value.get('LastName')
+            Password = value.get('Password')
+            MiddleName = value.get('MiddleName')
+
+        else:
+            FirstName = request.form.get('FirstName', default = None)
+            LastName = request.form.get('LastName', default = None)
+            Password = request.form.get('Password', default = None)
+            MiddleName = request.form.get('MiddleName', default = None)
 
         if not FirstName and not LastName and not Password and not MiddleName:
             rsp = Response("You need to update something", status=400, content_type="text/plain")
@@ -72,9 +80,11 @@ def get_user_order_by_accountID(AccountID):
     if request.method == 'GET':
 
         per_page = request.args.get('per_page', default = 10, type = int) # define how many results you want per page
+        if per_page > 10:
+            per_page = 10
         page = request.args.get('page', default = 1, type=int)
         offset = (page - 1) * per_page  # offset for SQL query
-        count = len(UserResource.get_order_by_userID(AccountID, 10000, 0))
+        count = UserResource.count_userorder(AccountID)
         number_pages = (count // per_page) + 1
 
         result = UserResource.get_order_by_userID(AccountID, per_page,offset)
@@ -91,7 +101,12 @@ def get_user_order_by_accountID(AccountID):
 
 
     if request.method == "POST":
-        OrderID = request.form.get('OrderID', default = None, type = int)
+        if request.is_json:
+            value = request.get_json()
+            OrderID = value.get('OrderID')
+        else:
+            OrderID = request.form.get('OrderID', default = None, type = int)
+
         if not OrderID:
             rsp = Response("You need to enter a OrderID", status=400, content_type="text/plain")
 
@@ -108,7 +123,11 @@ def get_user_order_by_accountID(AccountID):
 
 
     if request.method == 'DELETE':
-        OrderID = request.form.get('OrderID', default=None, type=int)
+        if request.is_json:
+            value = request.get_json()
+            OrderID = value.get('OrderID')
+        else:
+            OrderID = request.form.get('OrderID', default=None, type=int)
         if not OrderID:
             rsp = Response("You need to enter a OrderID", status=400, content_type="text/plain")
 
@@ -131,11 +150,12 @@ def get_user_restaurants(AccountID):
         rsp = Response("USER NOT FOUND", status=404, content_type="text/plain")
         return rsp
     if request.method == 'GET':
-
         per_page = request.args.get('per_page', default = 10, type = int) # define how many results you want per page
+        if per_page > 10:
+            per_page = 10
         page = request.args.get('page', default = 1, type=int)
         offset = (page - 1) * per_page  # offset for SQL query
-        count = len(UserResource.get_order_by_userID(AccountID, 10000, 0))
+        count = UserResource.count_user_restaurants(AccountID)
         number_pages = (count // per_page) + 1
 
         result = UserResource.get_restaurants_by_userID(AccountID, per_page,offset)
@@ -151,11 +171,20 @@ def get_user_restaurants(AccountID):
         return rsp
 
     if request.method == "POST":
-        RestaurantID = request.form.get('RestaurantID', default = None, type = int)
-        RestaurantName = request.form.get('RestaurantName', default='Unknown_restaurant', type=str)
+
+        if request.is_json:
+            value = request.get_json()
+            RestaurantID = value.get('RestaurantID')
+            RestaurantName = value.get('RestaurantName')
+
+        else:
+            RestaurantID = request.form.get('RestaurantID', default = None, type = int)
+            RestaurantName = request.form.get('RestaurantName', default='Unknown_restaurant', type=str)
 
         if not RestaurantID:
             rsp = Response("You need to enter a RestaurantID", status=400, content_type="text/plain")
+        if not RestaurantName:
+            rsp = Response("You need to enter a RestaurantName", status=400, content_type="text/plain")
 
         elif UserResource.check_duplicate_RestaurantID(RestaurantID):
             rsp = Response("Duplicate RestaurantID, you already favor this restaurant", status=400, content_type="text/plain")
@@ -169,7 +198,11 @@ def get_user_restaurants(AccountID):
         return rsp
 
     if request.method == 'DELETE':
-        RestaurantID = request.form.get('RestaurantID', default = None, type = int)
+        if request.is_json:
+            value = request.get_json()
+            RestaurantID = value.get('RestaurantID')
+        else:
+            RestaurantID = request.form.get('RestaurantID', default = None, type = int)
         if not RestaurantID:
             rsp = Response("You need to enter a RestaurantID", status=400, content_type="text/plain")
         elif not UserResource.check_duplicate_RestaurantID(RestaurantID):
@@ -192,6 +225,8 @@ def get_user_infor():
         LastName = request.args.get('LastName', default = None)
         Email = request.args.get('Email', default = None)
         per_page = request.args.get('per_page', default = 10, type = int) # define how many results you want per page
+        if per_page > 10:# if user try to get more than default, set to default
+            per_page = 10
         page = request.args.get('page', default = 1, type=int)
         offset = (page - 1) * per_page  # offset for SQL query
         #limit = request.args.get('limit', default = 50, type=int)
@@ -213,11 +248,22 @@ def get_user_infor():
 
 
     if request.method == 'POST':
-        FirstName = request.form.get('FirstName', default = None)
-        LastName = request.form.get('LastName', default = None)
-        Email = request.form.get('Email', default = None)
-        Password = request.form.get('Password', default = None)
-        MiddleName = request.form.get('MiddleName', default = '')
+        if request.is_json:
+            value = request.get_json()
+            FirstName = value.get('FirstName')
+            LastName = value.get('LastName')
+            Email = value.get('Email')
+            Password = value.get('Password')
+            MiddleName = value.get('MiddleName')
+            if not MiddleName:
+                MiddleName = ''
+        else:
+            FirstName = request.form.get('FirstName', default = None)
+            LastName = request.form.get('LastName', default = None)
+            Email = request.form.get('Email', default = None)
+            Password = request.form.get('Password', default = None)
+            MiddleName = request.form.get('MiddleName', default = '')
+
         if not FirstName or not LastName or not Password or not Email:
             rsp = Response("Please Enter Correct Information", status=400, content_type="text/plain")
 

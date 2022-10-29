@@ -55,7 +55,7 @@ class UserResource:
 
         conn = UserResource._get_connection()
         cur = conn.cursor()
-        sql = f'SELECT AccountID, FirstName, LastName, Email FROM Userinfor.user {query_str} ORDER BY LastName limit ' \
+        sql = f'SELECT AccountID, FirstName, MiddleName, LastName, Email FROM Userinfor.user {query_str} ORDER BY LastName limit ' \
               f'{limit} offset {offset}';
         print(sql)
         res = cur.execute(sql)
@@ -148,6 +148,8 @@ class UserResource:
 
         return result
 
+
+
     def check_duplicate_orderID(orderID):
         sql = f'select * from Userinfor.UserOrder where OrderID=%s'
         conn = UserResource._get_connection()
@@ -168,6 +170,13 @@ class UserResource:
 
         return res
 
+    def count_userorder(AccountID):
+        sql = f'select OrderID from Userinfor.UserOrder where UserAccountID=%s'
+        conn = UserResource._get_connection()
+        cur = conn.cursor()
+        res = cur.execute(sql, AccountID)
+        return res
+
     def delete_user_order(OrderID):
         sql = f'delete from Userinfor.UserOrder where OrderID= {OrderID}'
         conn = UserResource._get_connection()
@@ -185,6 +194,13 @@ class UserResource:
         result = cur.fetchall()
 
         return result
+
+    def count_user_restaurants(AccountID):
+        sql = f'select RestaurantID from Userinfor.FavoriteRestaurants where UserAccountID=%s'
+        conn = UserResource._get_connection()
+        cur = conn.cursor()
+        res = cur.execute(sql, AccountID)
+        return res
 
     def check_duplicate_RestaurantID(RestaurantID):
         sql = f'select * from Userinfor.FavoriteRestaurants where RestaurantID=%s'
