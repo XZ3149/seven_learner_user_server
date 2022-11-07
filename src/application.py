@@ -1,5 +1,5 @@
 import re
-
+import math
 from flask import Flask, Response, request, redirect, url_for, request
 from datetime import datetime
 import json
@@ -85,7 +85,7 @@ def get_user_order_by_accountID(AccountID):
         page = request.args.get('page', default = 1, type=int)
         offset = (page - 1) * per_page  # offset for SQL query
         count = UserResource.count_userorder(AccountID)
-        number_pages = (count // per_page) + 1
+        number_pages = math.ceil(count / per_page)
 
         result = UserResource.get_order_by_userID(AccountID, per_page,offset)
 
@@ -156,7 +156,7 @@ def get_user_restaurants(AccountID):
         page = request.args.get('page', default = 1, type=int)
         offset = (page - 1) * per_page  # offset for SQL query
         count = UserResource.count_user_restaurants(AccountID)
-        number_pages = (count // per_page) + 1
+        number_pages = math.ceil(count / per_page)
 
         result = UserResource.get_restaurants_by_userID(AccountID, per_page,offset)
 
@@ -238,7 +238,7 @@ def get_user_infor():
             count = UserResource.count_rows('user')['count(*)']
             result = UserResource.get_users(per_page, offset)
         if result:
-            number_pages = (count // per_page) + 1
+            number_pages = math.ceil(count / per_page)
             rsp = {'page': page, 'numberPages': number_pages}
             rsp['Users'] = result
             rsp = Response(json.dumps(rsp), status=200, content_type="application.json")
