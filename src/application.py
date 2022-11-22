@@ -1,11 +1,11 @@
 import re
-import math
+
 from flask import Flask, Response, request, redirect, url_for, request
 from datetime import datetime
 import json
 from UserResource import UserResource
 from flask_cors import CORS
-
+import math
 # Create the Flask application object.
 app = Flask(__name__)
 
@@ -158,6 +158,7 @@ def get_user_restaurants(AccountID):
         count = UserResource.count_user_restaurants(AccountID)
         number_pages = math.ceil(count / per_page)
 
+
         result = UserResource.get_restaurants_by_userID(AccountID, per_page,offset)
 
         if result:
@@ -193,6 +194,7 @@ def get_user_restaurants(AccountID):
             res = UserResource.add_user_restaurant(AccountID,RestaurantID,RestaurantName)
             if res:
                 rsp = redirect(url_for('get_user_restaurants', AccountID=AccountID, _method='GET'), code = 303)
+                print(rsp)
             else:
                 rsp = Response("Update fail", status=400, content_type="text/plain")
         return rsp
@@ -210,7 +212,7 @@ def get_user_restaurants(AccountID):
         else:
             res = UserResource.delete_user_restaurant(RestaurantID)
             if res:
-                rsp = rsp = redirect(url_for('get_user_restaurants', AccountID=AccountID, _method='GET'), code = 303)
+                rsp = redirect(url_for('get_user_restaurants', AccountID=AccountID, _method='GET'), code = 303)
             else:
                 rsp = Response("delete fail", status=400, content_type="text/plain")
         return rsp
@@ -255,23 +257,24 @@ def get_user_infor():
             Email = value.get('Email')
             Password = value.get('Password')
             MiddleName = value.get('MiddleName')
-            if not MiddleName:
-                MiddleName = ''
+            AccountID = value.get('AccountID')
+
         else:
             FirstName = request.form.get('FirstName', default = None)
             LastName = request.form.get('LastName', default = None)
             Email = request.form.get('Email', default = None)
             Password = request.form.get('Password', default = None)
-            MiddleName = request.form.get('MiddleName', default = '')
+            MiddleName = request.form.get('MiddleName', default = None)
+            AccountID = request.form.get('AccountID', default = None)
 
-        if not FirstName or not LastName or not Password or not Email:
-            rsp = Response("Please Enter Correct Information", status=400, content_type="text/plain")
-
+        if not FirstName or not LastName or not Email or not AccountID:
+            rsp = Response("Please Enter Correct Information, you must enter at least FirstName, LastName, Email, and AccountID", status=400, content_type="text/plain")
+        elif UserResource.get_by_AccountID(AccountID):
+            rsp = Response("AccountID have been used", status=400, content_type="text/plain")
         elif not UserResource.check_email_avalibility(Email):
             rsp = Response("Email have been used", status=400, content_type="text/plain")
         else:
-
-            result = UserResource.create_accountID(FirstName, LastName, MiddleName, Email, Password)
+            result = UserResource.create_accountID(FirstName, LastName, MiddleName, Email, Password, AccountID)
             # if insertion happen, server will return accountID, else return 0
             if result:
                 rsp = redirect(url_for('get_user_by_account_id', AccountID= result,_method='GET'), code = 303)

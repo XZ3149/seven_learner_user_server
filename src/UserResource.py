@@ -73,8 +73,6 @@ class UserResource:
         else:
             return False
 
-
-
     def count_rows(table_name, conditions = ''):
         sql = f'SELECT count(*) FROM Userinfor.{table_name} {conditions}';
         conn = UserResource._get_connection()
@@ -85,15 +83,11 @@ class UserResource:
         return result
 
 
-    def create_accountID(FirstName, LastName, MiddleName, Email, Password):
+    def create_accountID(FirstName, LastName, MiddleName, Email, Password, AccountID):
         """this is the function use to create account"""
-        AccountID = random.randrange(10000000,99999999)
+
         conn = UserResource._get_connection()
         cur = conn.cursor()
-        sql = 'SELECT * FROM Userinfor.user where AccountID=%s'
-
-        while (cur.execute(sql, AccountID)):
-            AccountID = random.randrange(10000000, 99999999)
 
         sql = 'insert into Userinfor.user (AccountID, FirstName, LastName,MiddleName,Email,Password) values (%s, %s, %s,%s, %s,%s)'
         res = cur.execute(sql, [AccountID,FirstName, LastName, MiddleName, Email, Password])
@@ -147,7 +141,6 @@ class UserResource:
         result = cur.fetchall()
 
         return result
-
 
 
     def check_duplicate_orderID(orderID):
