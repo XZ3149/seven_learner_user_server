@@ -9,7 +9,7 @@ import math
 # Create the Flask application object.
 app = Flask(__name__)
 
-CORS(app)
+CORS(app, supports_credentials=True)
 
 
 @app.get("/status/health")
@@ -24,6 +24,14 @@ def get_status():
     result = Response(json.dumps(msg), status=200, content_type="application/json")
     return result
 
+
+@app.before_request
+def before_request_test():
+    if 'AccountID' in request.view_args:
+        rsp = redirect(' http://ec2-18-222-34-48.us-east-2.compute.amazonaws.com:5011/authenticate', code=303)
+        if rsp.status != 200 or rsp.json().get('id') != request.view_args['AccountID']:
+            return rsp
+        
 
 @app.route("/users/<AccountID>", methods=["GET", 'PUT', 'DELETE'])
 def get_user_by_account_id(AccountID):
@@ -277,7 +285,7 @@ def get_user_infor():
             result = UserResource.create_accountID(FirstName, LastName, MiddleName, Email, Password, AccountID)
             # if insertion happen, server will return accountID, else return 0
             if result:
-                rsp = redirect(url_for('get_user_by_account_id', AccountID= result,_method='GET'), code = 303)
+                rsp = Response("Account creation successful", status=200, content_type="text/plain")
             else:
                 rsp = Response("Fail to create Account", status=400, content_type="text/plain")
         return rsp
