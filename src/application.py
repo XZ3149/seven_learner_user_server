@@ -1,12 +1,13 @@
-import re
 
 from flask import Flask, Response, request, redirect, url_for, request
 from datetime import datetime
 import json
 from UserResource import UserResource
+from Notification_middleware.Notification import SNS_Notification
 from flask_cors import CORS
 import math
 import requests
+from Notification_middleware.Notification import SNS_Notification
 # Create the Flask application object.
 app = Flask(__name__)
 
@@ -25,15 +26,18 @@ def get_status():
     result = Response(json.dumps(msg), status=200, content_type="application/json")
     return result
 
-
+"""
 @app.before_request
 def before_request_test():
-    if 'AccountID' in request.view_args:
-        rsp = requests.get('http://ec2-18-222-34-48.us-east-2.compute.amazonaws.com:5011/authenticate',
-                           cookies=request.cookies)
-        if rsp.status_code != 200 or rsp.json().get('id') != request.view_args['AccountID']:
-            return rsp.text, rsp.status_code, rsp.headers.items()
-
+    if request.method != 'OPTIONS':
+        if 'AccountID' in request.view_args:
+            rsp = requests.get('http://ec2-18-222-34-48.us-east-2.compute.amazonaws.com:5011/authenticate',
+                               headers=request.headers)
+            if rsp.status_code != 200:
+                return rsp.text, rsp.status_code, rsp.headers.items()
+            elif rsp.json().get('id') != request.view_args['AccountID']:
+                return Response("Access Denied", status=401, content_type="text/plain")
+"""
 
 @app.route("/users/<AccountID>", methods=["GET", 'PUT', 'DELETE'])
 def get_user_by_account_id(AccountID):
@@ -64,8 +68,9 @@ def get_user_by_account_id(AccountID):
             rsp = Response("You need to update something", status=400, content_type="text/plain")
         else:
             UserResource.update_user_infor(AccountID,FirstName,LastName,MiddleName, Password)
+            Email_message = UserResource.get_by_AccountID(AccountID)
+            SNS_Notification.send_email_notification(accountInfor=Email_message, action='update')
             rsp = redirect(url_for('get_user_by_account_id', AccountID=AccountID, _method='GET'), code = 303)
-
         return rsp
 
 
@@ -287,6 +292,8 @@ def get_user_infor():
             result = UserResource.create_accountID(FirstName, LastName, MiddleName, Email, Password, AccountID)
             # if insertion happen, server will return accountID, else return 0
             if result:
+                Email_message = UserResource.get_by_AccountID(AccountID)
+                SNS_Notification.send_email_notification(accountInfor = Email_message, action = 'create')
                 rsp = Response("Account creation successful", status=200, content_type="text/plain")
             else:
                 rsp = Response("Fail to create Account", status=400, content_type="text/plain")
