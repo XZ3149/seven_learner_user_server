@@ -26,7 +26,7 @@ def get_status():
     result = Response(json.dumps(msg), status=200, content_type="application/json")
     return result
 
-"""
+
 @app.before_request
 def before_request_test():
     if request.method != 'OPTIONS':
@@ -37,7 +37,7 @@ def before_request_test():
                 return rsp.text, rsp.status_code, rsp.headers.items()
             elif rsp.json().get('id') != request.view_args['AccountID']:
                 return Response("Access Denied", status=401, content_type="text/plain")
-"""
+
 
 @app.route("/users/<AccountID>", methods=["GET", 'PUT', 'DELETE'])
 def get_user_by_account_id(AccountID):
