@@ -28,10 +28,11 @@ def get_status():
 @app.before_request
 def before_request_test():
     if 'AccountID' in request.view_args:
-        rsp = redirect(' http://ec2-18-222-34-48.us-east-2.compute.amazonaws.com:5011/authenticate', code=303)
-        if rsp.status != 200 or rsp.json().get('id') != request.view_args['AccountID']:
-            return rsp
-        
+        rsp = requests.get('http://ec2-18-222-34-48.us-east-2.compute.amazonaws.com:5011/authenticate',
+                           cookies=request.cookies)
+        if rsp.status_code != 200 or rsp.json().get('id') != request.view_args['AccountID']:
+            return rsp.text, rsp.status_code, rsp.headers.items()
+
 
 @app.route("/users/<AccountID>", methods=["GET", 'PUT', 'DELETE'])
 def get_user_by_account_id(AccountID):
