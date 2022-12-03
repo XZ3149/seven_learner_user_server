@@ -1,12 +1,14 @@
-
 from flask import Flask, Response, request, redirect, url_for, request
 from datetime import datetime
 import json
 from UserResource import UserResource
+import sys
+sys.path.append('../Notification_middleware')
 from Notification import SNS_Notification
 from flask_cors import CORS
 import math
 import requests
+
 
 # Create the Flask application object.
 app = Flask(__name__)
