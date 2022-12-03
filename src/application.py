@@ -3,11 +3,11 @@ from flask import Flask, Response, request, redirect, url_for, request
 from datetime import datetime
 import json
 from UserResource import UserResource
-from Notification_middleware.Notification import SNS_Notification
+from Notification import SNS_Notification
 from flask_cors import CORS
 import math
 import requests
-from Notification import SNS_Notification
+
 # Create the Flask application object.
 app = Flask(__name__)
 
